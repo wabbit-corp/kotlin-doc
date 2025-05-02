@@ -89,34 +89,61 @@ import kotlin.math.floor
 }
 
 @Serializable sealed interface Doc<out Annotation> {
-    @Serializable private data object Empty : Doc<Nothing>
+    @Serializable private data object Empty : Doc<Nothing> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
 
-    @Serializable private data object Line : Doc<Nothing>
+    @Serializable private data object Line : Doc<Nothing> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
 
     @Serializable private data class FlatAlt<Annotation>(
         val doc: Doc<Annotation>,
-        val flat: Doc<Annotation>) : Doc<Annotation>
+        val flat: Doc<Annotation>
+    ) : Doc<Annotation> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
 
     @Serializable private data class Text(val text: String) : Doc<Nothing> {
         init {
             require(text.contains('\n').not()) { "Text must not contain newlines" }
         }
+
+        override fun toString(): String = this.layoutCompact().toString()
     }
 
     @Serializable private data class Nest<Annotation>(
         val indent: Int,
-        val doc: Doc<Annotation>) : Doc<Annotation>
+        val doc: Doc<Annotation>
+    ) : Doc<Annotation> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
 
     @Serializable private data class Annotated<Annotation>(
         val annotation: Annotation,
-        val doc: Doc<Annotation>) : Doc<Annotation>
+        val doc: Doc<Annotation>
+    ) : Doc<Annotation> {
+        override fun toString(): String = this.layoutCompact().toString()
 
+    }
     @Serializable private data class Concat<Annotation>(
-        val docs: List<Doc<Annotation>>) : Doc<Annotation>
+        val docs: List<Doc<Annotation>>
+    ) : Doc<Annotation> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
 
     @Serializable private data class Union<Annotation>(
         val left: Doc<Annotation>,
-        val right: Doc<Annotation>) : Doc<Annotation>
+        val right: Doc<Annotation>
+    ) : Doc<Annotation> {
+        override fun toString(): String = this.layoutCompact().toString()
+    }
+
+
+    fun nest(indent: Int): Doc<Annotation> = Doc.nest(indent, this)
+    fun hang(indent: Int): Doc<Annotation> = Doc.hang(indent, this)
+    fun group(): Doc<Annotation> = Doc.group(this)
+    fun align(): Doc<Annotation> = Doc.align(this)
 
 //    private data class Column<Annotation>(
 //        val f: (Int) -> Doc<Annotation>) : Doc<Annotation>
@@ -235,9 +262,52 @@ import kotlin.math.floor
         fun <A> concat(vararg docs: Doc<A>): Doc<A> =
             concat(docs.toList())
 
-        fun text(text: String): Doc<Nothing> =
-            if (text.isEmpty()) empty
-            else vsep(text.split('\n').map { Text(it) })
+        fun text(value: String): Doc<Nothing> =
+            if (value.isEmpty()) empty
+            else vsep(value.split('\n').map { Text(it) })
+        fun text(value: () -> String): Doc<Nothing> =
+            text(value())
+
+        inline fun stringBuilder(crossinline build: StringBuilder.() -> Unit): Doc<Nothing> =
+            text(StringBuilder().apply(build).toString())
+
+        fun viaToString(arg: Any?): Doc<Nothing> =
+            Doc.text(arg.toString())
+
+        fun viaToString(vararg args: Any?): Doc<Nothing> {
+            val sb = StringBuilder()
+            for (x in args) {
+                sb.append(x)
+            }
+            return Doc.text(sb.toString())
+        }
+
+        fun punctuate(punct: Doc<Nothing>, docs: List<Doc<Nothing>>): List<Doc<Nothing>> {
+            val result = mutableListOf<Doc<Nothing>>()
+            for ((index, doc) in docs.withIndex()) {
+                result.add(doc)
+                if (index < docs.size - 1) {
+                    result.add(punct)
+                }
+            }
+            return result
+        }
+
+        fun <A> encloseSep(open: Doc<A>, close: Doc<A>, separator: Doc<A>, docs: List<Doc<A>>): Doc<A> {
+            val result = mutableListOf<Doc<A>>()
+            result.add(open)
+            for ((index, doc) in docs.withIndex()) {
+                result.add(doc)
+                if (index < docs.size - 1) {
+                    result.add(separator)
+                }
+            }
+            result.add(close)
+            return concat(result)
+        }
+
+        fun <A> encloseSep(open: String, close: String, separator: String, docs: List<Doc<A>>): Doc<A> =
+            encloseSep(text(open), text(close), text(separator), docs)
 
         /**
          * `hsep` concatenates all documents `xs` horizontally by putting a space between all entries.
@@ -297,7 +367,13 @@ import kotlin.math.floor
          * Lays out the document x with the current nesting level (indentation of the following lines) increased by i.
          * Negative values are allowed, and decrease the nesting level accordingly.
          */
-        fun <A> nest(indent: Int, doc: Doc<A>): Doc<A> = Nest(indent, doc)
+        fun <A> nest(indent: Int, doc: Doc<A>): Doc<A> =
+            if (indent == 0) doc
+            else Nest(indent, doc)
+
+        fun <A> align(doc: Doc<A>): Doc<A> = TODO()
+
+        fun <A> hang(indent: Int, doc: Doc<A>): Doc<A> = align(nest(indent, doc))
 
         /**
          * The line document advances to the next line and indents to the current nesting level.
