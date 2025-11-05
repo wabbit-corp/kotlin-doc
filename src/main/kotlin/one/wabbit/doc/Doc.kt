@@ -510,7 +510,6 @@ import kotlin.math.floor
         //        x@Text{} -> x
         private fun <A> flatten(doc: Doc<A>): Doc<A>? {
             when (doc) {
-                null -> return null
                 is Line -> return null
                 is Empty -> return doc
                 is Text -> return doc
