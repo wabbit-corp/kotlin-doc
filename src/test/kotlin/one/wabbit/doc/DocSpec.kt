@@ -1,11 +1,11 @@
-//package one.wabbit.doc
+// package one.wabbit.doc
 //
-//import one.wabbit.random.gen.Gen
-//import one.wabbit.random.gen.foreach
-//import kotlin.test.Test
-//import kotlin.test.assertEquals
+// import one.wabbit.random.gen.Gen
+// import one.wabbit.random.gen.foreach
+// import kotlin.test.Test
+// import kotlin.test.assertEquals
 //
-//class DocSpec {
+// class DocSpec {
 //    val genString = Gen.string(
 //        Gen.int(1 .. 20),
 //        Gen.oneOf(listOf('a', 'b', 'c', 'd', 'e', ' ')))
@@ -36,15 +36,15 @@
 //        }
 //    }
 //
-////    @Test fun nestHomomorphism() {
-////        // nest 0 x = x
-////        // nest (i + j) x = nest i (nest j x)
-////
-////        Gen.foreach(genDoc, Gen.int(0 .. 10), Gen.int(0 .. 10)) { x, i, j ->
-////            assertEquals(x, Doc.nest(0, x))
-////            assertEquals(Doc.nest(i + j, x), Doc.nest(i, Doc.nest(j, x)))
-////        }
-////    }
+// //    @Test fun nestHomomorphism() {
+// //        // nest 0 x = x
+// //        // nest (i + j) x = nest i (nest j x)
+// //
+// //        Gen.foreach(genDoc, Gen.int(0 .. 10), Gen.int(0 .. 10)) { x, i, j ->
+// //            assertEquals(x, Doc.nest(0, x))
+// //            assertEquals(Doc.nest(i + j, x), Doc.nest(i, Doc.nest(j, x)))
+// //        }
+// //    }
 //
 //    // nest i (x <> y) = nest i x <> nest i y
 //    // nest i empty = empty
@@ -74,4 +74,4 @@
 //
 //        println(prettySig("f", listOf("Int", "Int"), "IO ()").layoutCompact())
 //    }
-//}
+// }
