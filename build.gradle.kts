@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 repositories {
     mavenCentral()
+
+    maven("https://jitpack.io")
 }
 
 group   = "one.wabbit"
@@ -30,8 +32,8 @@ publishing {
 }
 
 dependencies {
-    implementation(project(":kotlin-data")) // 3.0.0
-    testImplementation(project(":kotlin-random-gen")) // 2.0.0
+    implementation("one.wabbit:kotlin-data:3.0.0")
+    testImplementation("one.wabbit:kotlin-random-gen:2.0.0")
 
     testImplementation(kotlin("test"))
 
